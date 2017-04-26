@@ -146,7 +146,7 @@ class PyChrome(Element,Interaction,Combo):
                 logging.critical("GhostDriver (PhantomJS) is not present!")
                 exit(1)
         else:
-            self.drivername = "chromedriver"
+            self.drivername = "chromedriver_win.exe" if os.name == 'nt' else "chromedriver"
             logging.info("Using WebDrver {}".format(self.drivername))
             logging.info("Starting Chrome Browser")
             file_directory = "{}/{}".format(self.bin_dir,self.drivername)
