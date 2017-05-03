@@ -1,6 +1,7 @@
 # from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from utility import record
+import os
 #
 # driver = webdriver.Chrome('./bin/chromedriver')
 # driver.get("http://www.google.com")
@@ -15,38 +16,54 @@ from utility import record
 from pyChrome import PyChrome
 
 browser = PyChrome()
-# url = "https://boards.greenhouse.io/6sense/jobs/238123"
-url = "https://jobs.lever.co/21/1c62cece-d385-4b79-a36e-5cb30cd1e9f0/apply"
+url = "https://boards.greenhouse.io/6sense/jobs/238123"
+# url = "https://jobs.lever.co/academia/53029c67-058c-4162-a4ec-461f21abad38/apply"
 browser.open(url)
 # browser.scrollDown()
-# form_id = ["first_name", "last_name", "email",
-#            "phone", "job_application_location"]
-# form_values = ["Huyanh", "Hoang", "huyanhh@uci.edu",
-#                "5626661609", "Irvine, California, United States"]
+### LEVER
+# form_id = ["name", "email",
+#            "phone"]#, "job_application_location"]
+# form_values = ["Huyanh Hoang", "huyanhh@uci.edu",
+#                "5626661609"]#, "Irvine, California, United States"]
 #
 # zipped = zip(form_id, form_values)
-# for i, text in zipped:
-#     element = browser.findElementByID(i)
+#
+# for i, text in zip(form_id, form_values):
+#     element = browser.findElementByName(i)
 #     browser.sendTextToElement(text, element)
+#
+# file_element = browser.findElementByID("resume-upload-input")
+# file_path = "/Users/huyanh/Documents/dont_go_in_here/mesos-scraper/samples/HuyanhHoang-Resume.pdf"
+# file_element.send_keys(file_path)
+#
+# submit = browser.findElement(element=None,id=None,name=None,classname="template-btn-submit",xpath=None,tag="button",css=None,linktext=None,partialtext=None)
+# browser.clickElement(submit)
 
-# attach_element = browser.findElementByXPath("#main_fields > div:nth-child(11) > div > div.link-container > a:nth-child(1)")
-# browser.clickElement(attach_element)
-# file_element = browser.findElementByID("file")
-# attach_element.send_keys("/Users/huyanh/Documents/#job\ apps/Resume/Awesome-CV/HuyanhHoang-Resume.pdf")
-# attach_element.send_keys(Keys.RETURN)
+### GREENHOUSE
 
-form_id = ["name", "email",
-        "phone", "urls[LinkedIn]"]
-form_values = ["kek kek", "kkek@uci.edu",
-            "5626661609", "http://linkedin.com/in/kek"]
+form_id = ["first_name", "last_name", "email",
+           "phone", "job_application_location"]
+
+form_values = ["Huyanh", "Hoang", "huyanhh@uci.edu",
+               "5626661609", "Irvine, California, United States"]
 
 for i, text in zip(form_id, form_values):
-    element = browser.findElementByName(i)
+    element = browser.findElementByID(i)
     browser.sendTextToElement(text, element)
 
-file_element = browser.findElementByID("resume-upload-input")
-# file_element.send_keys("/Users/huyanh/Documents/#job\ apps/Resume/Awesome-CV/HuyanhHoang-Resume.pdf")
+file_element = browser.findElementByID("file")
+file_path = "/Users/huyanh/Documents/dont_go_in_here/mesos-scraper/samples/HuyanhHoang-Resume.pdf"
+file_element.send_keys(file_path)
 
-submit = browser.findElement(element=None, id=None, name=None, classname="template-btn-submit")
-browser.clickElement(file_element)
-# browser.clickElement(submit)
+custom = browser.findElementByID("custom_fields")
+field = browser.findElementByTag("div", custom)
+siblings = browser.findSiblingsElements()
+for element in siblings:
+    label = browser.findElementByTag("label", element)
+    print(label.text)
+    if "*" in label.text:
+        input_box = browser.findElement(element=label, css="input[type=text]")
+        input_box.send_keys("kek")
+
+submit = browser.findElementByID("submit_app")
+#browser.clickElement(submit)
