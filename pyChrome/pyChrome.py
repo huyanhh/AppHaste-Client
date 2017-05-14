@@ -3,8 +3,12 @@ import os
 import sys
 import logging
 
-curr_dir = os.getcwd()
+# logging.getLogger().setLevel(logging.INFO)
+#change directory to match with pyCharm
+
+curr_dir = "{}".format(os.getcwd())
 logging.info("Current Work directory: {}".format(curr_dir))
+print("Current Work directory: {}".format(curr_dir))
 src_dir = "{}/src".format(curr_dir)
 logging.info("Source directory: {}".format(src_dir))
 
@@ -78,7 +82,10 @@ class PyChrome(Element,Interaction,Combo):
     def __init__(self, config_filename=None, ghostmode=0):
         self.config_filename = "config.json"
         self.bin_dir = binary_dir
-        self.directory = os.getcwd()
+        # already set on top?
+        # self.directory = os.getcwd()
+        self.directory = curr_dir
+        print(self.directory)
         self.pageload_timeout = -1
         self.ghost = False
         if ghostmode and self.validateGhostmode(ghostmode):
@@ -141,6 +148,7 @@ class PyChrome(Element,Interaction,Combo):
             if (os.path.exists(file_directory)):
                 self.driver = webdriver.PhantomJS(executable_path=file_directory)
                 self.driver.set_page_load_timeout(self.pageload_timeout)
+                # TODO: test here for not getting google
                 self.browser = Browser(self.driver,True)
             else:
                 logging.critical("GhostDriver (PhantomJS) is not present!")
@@ -158,6 +166,7 @@ class PyChrome(Element,Interaction,Combo):
                 self.driver = webdriver.Chrome(file_directory,0,chrome_options,None,None,None)
                 self.driver.set_page_load_timeout(self.pageload_timeout)
                 self.window = Window(self.driver, config_filename=self.config_filename)
+                # TODO: here too
                 self.browser = self.window.browser
             else:
                 logging.critical("ChromeDriver is not present!")
