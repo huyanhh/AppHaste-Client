@@ -1,0 +1,8 @@
+linkedin->linkedin
+github->github
+website->website
+site->website
+sponsorship->sponsorship_required
+visa->sponsorship_required
+hear->job_hear
+authorized->work_authorized
