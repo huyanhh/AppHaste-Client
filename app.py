@@ -4,27 +4,19 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
-from utility import record
 import os
 import dictionary_builder
-from pyChrome import PyChrome
+import logging
+import datetime
 
-keyword_dict = dictionary_builder.build_dict('../keywords.txt')
-questions_dict = dictionary_builder.build_dict('../questions.txt')
-browser = PyChrome()
-greenhouse = []
-# url = "https://boards.greenhouse.io/6sense/jobs/238123"
-# url = "https://boards.greenhouse.io/checkr/jobs/163433?gh_jid=163433"
-greenhouse.append("https://boards.greenhouse.io/yext/jobs/573036")
-greenhouse.append("https://boards.greenhouse.io/acorns/jobs/126365?gh_jid=126365")
-# url = "https://boards.greenhouse.io/acorns/jobs/126365?gh_jid=126365"
-url = "https://boards.greenhouse.io/embed/job_app?for=amino&t=lwpnt21&token=504429&b=https://amino.com/careers/504429/"
-# url = "https://jobs.lever.co/academia/53029c67-058c-4162-a4ec-461f21abad38/apply"
-# url = "https://www.23andme.com/careers/oXNM2fwi/apply/"
-# url = "http://jobs.jobvite.com/23andme/job/oXNM2fwi/apply?nl=1"
-# url = "https://www.google.com"
-browser.open(url)
-browser.scrollDown()
+curr_time = datetime.datetime.now().strftime("%Y-%m-%d")
+logging.basicConfig(filename='../logs/{}.log'.format(curr_time),
+                    filemode='a',
+                    format='%(asctime)s %(module)s %(levelname)s: %(message)s',
+                    datefmt='%H:%M:%S',
+                    level=logging.ERROR)
+logging.getLogger('app').setLevel(logging.INFO)
+
 ### LEVER
 # form_id = ["name", "email",
 #            "phone"]#, "job_application_location"]
@@ -72,11 +64,14 @@ def applyGreenhouse():
             question = dictionary_builder.check_question(label.text, keyword_dict)
             if question:
                 input_box = browser.findElement(element=label, css="input[type=text]")
-                input_box.send_keys(questions_dict[question])
+                try:
+                    input_box.send_keys(questions_dict[question])
+                except:
+                    print('box not found')
             else:
+                print('trying to answer: ', label.text)
                 dictionary_builder.save_question(label.text, browser.driver.current_url)
 
-applyGreenhouse()
     # submit = browser.findElementByID("submit_app")
 
 ### JOBVITE
@@ -105,3 +100,28 @@ applyGreenhouse()
 # file_element.send_keys(file_path)
 
 # browser.quit()
+
+if __name__ == '__main__':
+    logger = logging.getLogger('app')
+    logger.info('\n --------NEW SESSION--------')
+    from pyChrome import PyChrome
+    browser = PyChrome()
+    keyword_dict = dictionary_builder.build_dict('../keywords.txt')
+    questions_dict = dictionary_builder.build_dict('../questions.txt')
+    logger.info('Using keyword dict: {}'.format(keyword_dict))
+    logger.info('Using questions dict: {}'.format(questions_dict))
+
+    greenhouse = []
+    # url = "https://boards.greenhouse.io/6sense/jobs/238123"
+    # url = "https://boards.greenhouse.io/checkr/jobs/163433?gh_jid=163433"
+    greenhouse.append("https://boards.greenhouse.io/yext/jobs/573036")
+    greenhouse.append("https://boards.greenhouse.io/acorns/jobs/126365?gh_jid=126365")
+    # url = "https://boards.greenhouse.io/acorns/jobs/126365?gh_jid=126365"
+    url = "https://boards.greenhouse.io/embed/job_app?for=amino&t=lwpnt21&token=504429&b=https://amino.com/careers/504429/"
+    greenhouse.append(url)
+
+    for link in greenhouse:
+        browser.open(link)
+        applyGreenhouse()
+        browser.newTab()
+        browser.rightTab()
