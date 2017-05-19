@@ -8,7 +8,6 @@ def build_dict(file_name) -> dict:
         _dict[kv_pair[0]] = kv_pair[1].strip('\n')
 
     file.close()
-    print(_dict)
     return _dict
 
 
@@ -18,7 +17,7 @@ def check_question(phrase: str, kw_dict: dict) -> str:
     If not found, then return -1
     """
     for k, v in kw_dict.items():
-        if k in phrase:
+        if k in phrase.casefold():
             return v
     return ''
 
