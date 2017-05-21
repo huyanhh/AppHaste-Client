@@ -41,6 +41,7 @@ logging.getLogger('app').setLevel(logging.INFO)
 ### GREENHOUSE
 
 def applyGreenhouse(logger):
+    logger.info('Starting at page: {}'.format(browser.driver.current_url))
     form_id = ["first_name", "last_name", "email",
                "phone", "job_application_location"]
 
@@ -70,7 +71,7 @@ def applyGreenhouse(logger):
     siblings = browser.findSiblingsElements()
     for element in siblings:
         label = browser.findElementByTag("label", element)
-        if "*" in label.text:
+        if label and "*" in label.text:
             question = dictionary_builder.check_question(phrase=label.text, kw_dict=keyword_dict)
             if question:
                 answer = questions_dict[question]
@@ -98,8 +99,15 @@ def applyGreenhouse(logger):
             else:
                 logging.warning('Question not in graph, saving: {}'.format(label.text))
                 dictionary_builder.save_question(label.text, browser.driver.current_url)
+        else:
+            logger.warning('Label does not exist or not required')
     logger.info("Finished answering questions")
-    # submit = browser.findElementByID("submit_app")
+    # browser.scrollDown()
+    submit = browser.findElementByID("submit_app")
+    # must wait until resume submission is over?
+    browser.clickElement(submit)
+    logger.info('Clicked')
+    logger.info('Confirmation page, {}'.format(browser.driver.current_url))
 
 ### JOBVITE
 
@@ -138,21 +146,18 @@ if __name__ == '__main__':
     logger.info('Using keyword dict: {}'.format(keyword_dict))
     logger.info('Using questions dict: {}'.format(questions_dict))
 
-    greenhouse = []
-    greenhouse = ["https://boards.greenhouse.io/embed/job_app?for=zocdoc&token=122726&b=https://www.zocdoc.com/about/careers/",
-                  "https://boards.greenhouse.io/acquia/jobs/645684",
-                  "https://boards.greenhouse.io/betterment/jobs/13624?gh_jid=13624",
-                  "https://boards.greenhouse.io/6sense/jobs/238123",
-                  "https://boards.greenhouse.io/checkr/jobs/163433?gh_jid=163433",
-                  "https://boards.greenhouse.io/yext/jobs/573036",
-                  "https://boards.greenhouse.io/acorns/jobs/126365?gh_jid=126365",
-                  "https://boards.greenhouse.io/asana/jobs/613752?gh_src=bso7t51#.WRdFY1PyvOQ"
-                  "https://boards.greenhouse.io/embed/job_app?for=amino&t=lwpnt21&token=504429&b=https://amino.com/careers/504429/"]
-    # greenhouse.append("https://boards.greenhouse.io/6sense/jobs/238123")
-    for link in greenhouse:
-        browser.open(link)
-        applyGreenhouse(logger)
-        browser.newTab()
-        browser.rightTab()
+    # greenhouse = dictionary_builder.parse_csv('../samples/urls.csv')[1:4]
+    greenhouse = ['https://boards.greenhouse.io/acorns/jobs/126365?gh_jid=126365']
+
+    browser.open(greenhouse[0])
+    applyGreenhouse(logger)
+
+    # for link in greenhouse:
+    #     browser.open(link)
+    #     applyGreenhouse(logger)
+    #     browser.newTab()
+    #     browser.rightTab()
 
     logger.info('--------END SESSION--------')
+
+

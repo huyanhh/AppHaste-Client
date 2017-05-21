@@ -25,3 +25,10 @@ def check_question(phrase: str, kw_dict: dict) -> str:
 def save_question(phrase: str, url: str):
     print(phrase)
     print(url)
+
+
+def parse_csv(file_name: str):
+    import csv
+    with open(file_name, newline='') as file:
+        reader = csv.reader(file, delimiter=',')
+        return [row[1] for row in reader]
