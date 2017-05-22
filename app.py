@@ -2,8 +2,8 @@
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support import expected_conditions
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import Select
 import os
 import dictionary_builder
@@ -103,11 +103,19 @@ def applyGreenhouse(logger):
             logger.warning('Label does not exist or not required')
     logger.info("Finished answering questions")
     # browser.scrollDown()
-    submit = browser.findElementByID("submit_app")
-    # must wait until resume submission is over?
-    browser.clickElement(submit)
-    logger.info('Clicked')
-    logger.info('Confirmation page, {}'.format(browser.driver.current_url))
+    try:
+        WebDriverWait(browser.driver, 5).until(
+            expected_conditions.text_to_be_present_in_element((By.ID, 'resume_filename'), 'HuyanhHoang-Resume.pdf')
+        )
+    except TimeoutException:
+        logger.error('Resume was not uploaded, save file here')
+        dictionary_builder.save_question('', 'Resume not uploaded')
+        return
+
+    # submit = browser.findElementByID("submit_app")
+    # browser.clickElement(submit)
+    # logger.info('Clicked')
+    # logger.info('Confirmation page, {}'.format(browser.driver.current_url))
 
 ### JOBVITE
 
@@ -147,7 +155,7 @@ if __name__ == '__main__':
     logger.info('Using questions dict: {}'.format(questions_dict))
 
     # greenhouse = dictionary_builder.parse_csv('../samples/urls.csv')[1:4]
-    greenhouse = ['https://boards.greenhouse.io/acorns/jobs/126365?gh_jid=126365']
+    greenhouse = ['https://boards.greenhouse.io/autogravitycorporation/jobs/218041#.WOhP0hLyvUJ']
 
     browser.open(greenhouse[0])
     applyGreenhouse(logger)

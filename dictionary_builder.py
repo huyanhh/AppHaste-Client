@@ -22,9 +22,12 @@ def check_question(phrase: str, kw_dict: dict) -> str:
     return ''
 
 
-def save_question(phrase: str, url: str):
-    print(phrase)
-    print(url)
+def save_question(url: str, reason: str, phrase: str=''):
+    import csv
+    with open('saved_urls', 'w', newline='') as file:
+        writer = csv.writer(file, delimiter=',',
+                            quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        writer.writerow([url, reason, phrase])
 
 
 def parse_csv(file_name: str):
