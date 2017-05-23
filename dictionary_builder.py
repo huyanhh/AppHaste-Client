@@ -24,7 +24,7 @@ def check_question(phrase: str, kw_dict: dict) -> str:
 
 def save_question(url: str, reason: str, phrase: str=''):
     import csv
-    with open('saved_urls', 'w', newline='') as file:
+    with open('../samples/saved_urls', 'w', newline='') as file:
         writer = csv.writer(file, delimiter=',',
                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
         writer.writerow([url, reason, phrase])
