@@ -61,7 +61,7 @@ def applyGreenhouse(logger):
 
     try:
         file_element = browser.findElementByID("file")
-        file_path = "/Users/huyanh/Documents/dont_go_in_here/mesos-scraper/samples/HuyanhHoang-Resume.pdf"
+        file_path = "C:\\Users\\brian\\Desktop\\Test.txt"
         file_element.send_keys(file_path)
     except AttributeError:
         logging.error('File upload error, element does not exist')
@@ -99,6 +99,8 @@ def applyGreenhouse(logger):
             else:
                 logging.warning('Question not in graph, saving: {}'.format(label.text))
                 dictionary_builder.save_question(label.text, browser.driver.current_url)
+        elif not_required(label):
+            find_checkbox(label)
         else:
             logger.warning('Label does not exist or not required')
     logger.info("Finished answering questions")
@@ -116,6 +118,16 @@ def applyGreenhouse(logger):
     # browser.clickElement(submit)
     # logger.info('Clicked')
     # logger.info('Confirmation page, {}'.format(browser.driver.current_url))
+
+
+def find_checkbox(label):
+    if "\n" in label.text:
+        for line in label.text.split('\n'):
+            if line.strip().lower() == 'other':
+                print(line)
+
+def not_required(label):
+    return label and "*" not in label.text
 
 ### JOBVITE
 
@@ -155,8 +167,9 @@ if __name__ == '__main__':
     logger.info('Using questions dict: {}'.format(questions_dict))
 
     # greenhouse = dictionary_builder.parse_csv('../samples/urls.csv')[1:4]
-    greenhouse = ['https://boards.greenhouse.io/autogravitycorporation/jobs/218041#.WOhP0hLyvUJ']
-
+    test_url = "https://boards.greenhouse.io/mozilla/jobs/695728"
+    #greenhouse = ['https://boards.greenhouse.io/autogravitycorporation/jobs/218041#.WOhP0hLyvUJ']
+    greenhouse = [test_url]
     browser.open(greenhouse[0])
     applyGreenhouse(logger)
 
