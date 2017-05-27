@@ -40,7 +40,7 @@ logging.getLogger('app').setLevel(logging.INFO)
 
 ### GREENHOUSE
 
-def applyGreenhouse(logger):
+def applyGreenhouse(logger, file_path):
     current_url = browser.driver.current_url
     logger.info('Starting at page: {}'.format(current_url))
     form_id = ["first_name", "last_name", "email",
@@ -57,12 +57,17 @@ def applyGreenhouse(logger):
             inputs.append(True)
             browser.sendTextToElement(text, element)
 
+    # for now we hard code the click.
+    location = browser.findElementByID('job_application_location')
+    browser.sendTextToElement('Irvine, California, United States', location)
+    location_item = browser.findElementByClass('ui-menu-item')
+    browser.findElementByTag('div', location_item).click()
+
     if len(inputs) == 0:
         logging.error("None of the standard inputs filled, saving application: {}".format(current_url))
         dictionary_builder.save_question(current_url, "Standard inputs not filled")
     try:
         file_element = browser.findElementByID("file")
-        file_path = "C:\\Users\\brian\\Desktop\\Test.txt"
         file_element.send_keys(file_path)
     except AttributeError:
         logging.error('File upload error, element does not exist')
@@ -73,9 +78,11 @@ def applyGreenhouse(logger):
     for element in siblings:
         label = browser.findElementByTag("label", element)
         if label and "*" in label.text:
-            question = dictionary_builder.check_question(phrase=label.text, kw_dict=keyword_dict)
+            # check if the question exists in our dictionary
+            question = dictionary_builder.check_question(phrase=label.text.split("\n")[0], kw_dict=keyword_dict)
             if question:
                 answer = questions_dict[question]
+                answers = questions_dict[question].split("|")
                 input_box = browser.findElement(element=label, css="input[type=text]")
                 if not input_box:
                     dropdown = browser.findElementByTag("select", label)
@@ -83,15 +90,25 @@ def applyGreenhouse(logger):
                         select = Select(dropdown)
                         logger.info("Dropdown found")
                         if "Yes" in dropdown.text and "No" in dropdown.text:
-                            logger.info("yes/no question found")
+                            logger.info("Yes/No question found")
                             select.select_by_visible_text(answer)
                         else:
-                            logger.info("not a yes/no question")
+                            logger.info("Not a Yes/No question")
                             logger.info('Questions: {}'.format(select.options))
-                            select.select_by_index(1)
-                            logger.info('Selected "{}"'.format(select.first_selected_option))
+                            def find_answer():
+                                for _i, option in enumerate(select.options):
+                                    for answer in answers:
+                                        if answer in option.text:
+                                            select.select_by_index(_i)
+                                            return answer
+                                return 0
+                            if not find_answer():
+                                select.select_by_index(1)
+                                logger.info('Nothing in dict, selecting "{}"'.format(select.first_selected_option))
+                    elif browser.findElementByTag('label', label):  # find the direct child label
+                        find_checkbox()
                     else:
-                        logger.error("Neither dropdown or input (No tags found)")
+                        logger.error("Neither dropdown nor input (No tags found)")
                 else:
                     try:
                         input_box.send_keys(answer)
@@ -100,8 +117,6 @@ def applyGreenhouse(logger):
             else:
                 logging.warning('Question not in graph, saving: {}'.format(label.text))
                 dictionary_builder.save_question(current_url, 'Question not in graph', label.text)
-        elif not_required(label):
-            find_checkbox(label)
         else:
             logger.warning('Label does not exist or not required')
     logger.info("Finished answering questions")
@@ -129,13 +144,11 @@ def applyGreenhouse(logger):
     #     dictionary_builder.save_question(current_url, 'Resume not uploaded')
     #     #return
 
-
-
-def find_checkbox(label):
-    if "\n" in label.text:
-        for line in label.text.split('\n'):
-            if line.strip().lower() == 'other':
-                print(line)
+def find_checkbox():
+    siblings = browser.findSiblingsElements()
+    for sublabel in siblings:
+        if 'other' in sublabel.text.lower():
+            browser.findElementByTag('input', sublabel).click()
 
 def not_required(label):
     return label and "*" not in label.text
@@ -177,12 +190,16 @@ if __name__ == '__main__':
     logger.info('Using keyword dict: {}'.format(keyword_dict))
     logger.info('Using questions dict: {}'.format(questions_dict))
 
+    # file_path = "C:\\Users\\brian\\Desktop\\Test.txt"
+    file_path = "/Users/huyanh/Documents/dont_go_in_here/mesos-scraper/samples/HuyanhHoang-Resume.pdf"
+
     # greenhouse = dictionary_builder.parse_csv('../samples/urls.csv')[1:4]
     test_url = "https://boards.greenhouse.io/mozilla/jobs/695728"
+    # test_url = "http://localhost:8000"
     #greenhouse = ['https://boards.greenhouse.io/autogravitycorporation/jobs/218041#.WOhP0hLyvUJ']
     greenhouse = [test_url]
     browser.open(greenhouse[0])
-    applyGreenhouse(logger)
+    applyGreenhouse(logger, file_path=file_path)
 
     # for link in greenhouse:
     #     browser.open(link)

@@ -6,3 +6,9 @@ sponsorship->sponsorship_required
 visa->sponsorship_required
 hear->job_hear
 authorized->work_authorized
+authorization->work_authorized
+about|yourself->about
+current|company->current_company
+current|title->current_title
+salary->salary
+18->age

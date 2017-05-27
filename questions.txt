@@ -10,4 +10,9 @@ github->https://github.com/huyanhh
 website->https://huyanhh.net
 sponsorship_required->No
 job_hear->Other
-work_authorized->Yes
+work_authorized->Yes|any
+about->I build cool things
+current_company->AppHaste
+current_title->Founder
+salary->Competitive
+age->Yes
