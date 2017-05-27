@@ -41,7 +41,8 @@ logging.getLogger('app').setLevel(logging.INFO)
 ### GREENHOUSE
 
 def applyGreenhouse(logger):
-    logger.info('Starting at page: {}'.format(browser.driver.current_url))
+    current_url = browser.driver.current_url
+    logger.info('Starting at page: {}'.format(current_url))
     form_id = ["first_name", "last_name", "email",
                "phone", "job_application_location"]
 
@@ -57,8 +58,8 @@ def applyGreenhouse(logger):
             browser.sendTextToElement(text, element)
 
     if len(inputs) == 0:
-        logging.error("None of the standard inputs filled, saving application: {}".format(browser.driver.current_url))
-
+        logging.error("None of the standard inputs filled, saving application: {}".format(current_url))
+        dictionary_builder.save_question(current_url, "Standard inputs not filled")
     try:
         file_element = browser.findElementByID("file")
         file_path = "C:\\Users\\brian\\Desktop\\Test.txt"
@@ -98,26 +99,36 @@ def applyGreenhouse(logger):
                         logger.error("Element isn't valid")
             else:
                 logging.warning('Question not in graph, saving: {}'.format(label.text))
-                dictionary_builder.save_question(label.text, browser.driver.current_url)
+                dictionary_builder.save_question(current_url, 'Question not in graph', label.text)
         elif not_required(label):
             find_checkbox(label)
         else:
             logger.warning('Label does not exist or not required')
     logger.info("Finished answering questions")
-    # browser.scrollDown()
     try:
         WebDriverWait(browser.driver, 5).until(
             expected_conditions.text_to_be_present_in_element((By.ID, 'resume_filename'), 'HuyanhHoang-Resume.pdf')
         )
     except TimeoutException:
         logger.error('Resume was not uploaded, save file here')
-        dictionary_builder.save_question('', 'Resume not uploaded')
-        return
+        dictionary_builder.save_question(current_url, 'Resume not uploaded')
+        #return
 
     # submit = browser.findElementByID("submit_app")
+    # page = browser.findElementByTag('html')
     # browser.clickElement(submit)
     # logger.info('Clicked')
-    # logger.info('Confirmation page, {}'.format(browser.driver.current_url))
+    # # might be better to watch for a specific element, because form might not be submitted?
+    # try:
+    #     WebDriverWait(browser.driver, 5).until(
+    #         expected_conditions.staleness_of(page)
+    #     )
+    #     logger.info('Confirmation page, {}'.format(browser.driver.current_url))
+    # except TimeoutException:
+    #     logger.error('URL didn\'t change, save file here')
+    #     dictionary_builder.save_question(current_url, 'Resume not uploaded')
+    #     #return
+
 
 
 def find_checkbox(label):
@@ -178,6 +189,7 @@ if __name__ == '__main__':
     #     applyGreenhouse(logger)
     #     browser.newTab()
     #     browser.rightTab()
+
 
     logger.info('--------END SESSION--------')
 

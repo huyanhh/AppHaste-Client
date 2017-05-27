@@ -22,12 +22,14 @@ def check_question(phrase: str, kw_dict: dict) -> str:
     return ''
 
 
-def save_question(url: str, reason: str, phrase: str=''):
+def save_question(url: str, reason: str, question: str=''):
     import csv
-    with open('../samples/saved_urls', 'w', newline='') as file:
+    import datetime
+    day = datetime.datetime.now().strftime("%Y-%m-%d")
+    with open('../samples/saved_urls_{}'.format(day), 'a', newline='') as file:
         writer = csv.writer(file, delimiter=',',
                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow([url, reason, phrase])
+        writer.writerow([url, reason, question])
 
 
 def parse_csv(file_name: str):
