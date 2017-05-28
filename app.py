@@ -3,7 +3,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.support.ui import Select
 import os
 import dictionary_builder
@@ -59,9 +59,11 @@ def applyGreenhouse(logger, file_path):
 
     # for now we hard code the click.
     location = browser.findElementByID('job_application_location')
-    browser.sendTextToElement('Irvine, California, United States', location)
-    location_item = browser.findElementByClass('ui-menu-item')
-    browser.findElementByTag('div', location_item).click()
+    # if location not found then it will use the previous item found, PyChrome issue
+    if location:
+        browser.sendTextToElement('Irvine, California, United States', location)
+        location_item = browser.findElementByClass('ui-menu-item')
+        browser.findElementByTag('div', location_item).click()
 
     if len(inputs) == 0:
         logging.error("None of the standard inputs filled, saving application: {}".format(current_url))
@@ -90,11 +92,15 @@ def applyGreenhouse(logger, file_path):
                         select = Select(dropdown)
                         logger.info("Dropdown found")
                         if "Yes" in dropdown.text and "No" in dropdown.text:
-                            logger.info("Yes/No question found")
-                            select.select_by_visible_text(answer)
+                            try:
+                                logger.info("Yes/No question found")
+                                select.select_by_visible_text(answer)
+                            except NoSuchElementException:
+                                logger.error('Could not fill out yes/no question: {}'.format(dropdown.text))
                         else:
                             logger.info("Not a Yes/No question")
                             logger.info('Questions: {}'.format(select.options))
+
                             def find_answer():
                                 for _i, option in enumerate(select.options):
                                     for answer in answers:
@@ -185,27 +191,27 @@ if __name__ == '__main__':
     logger.info('\n --------NEW SESSION--------')
     from pyChrome import PyChrome
     browser = PyChrome()
-    keyword_dict = dictionary_builder.build_dict('../keywords.txt')
-    questions_dict = dictionary_builder.build_dict('../questions.txt')
+    keyword_dict = dictionary_builder.build_dict('../keywords.csv')
+    questions_dict = dictionary_builder.build_dict('../questions.csv')
     logger.info('Using keyword dict: {}'.format(keyword_dict))
     logger.info('Using questions dict: {}'.format(questions_dict))
 
     # file_path = "C:\\Users\\brian\\Desktop\\Test.txt"
     file_path = "/Users/huyanh/Documents/dont_go_in_here/mesos-scraper/samples/HuyanhHoang-Resume.pdf"
 
-    # greenhouse = dictionary_builder.parse_csv('../samples/urls.csv')[1:4]
-    test_url = "https://boards.greenhouse.io/mozilla/jobs/695728"
+    greenhouse = dictionary_builder.parse_csv('../samples/urls.csv')[1:10]
+    # test_url = "https://boards.greenhouse.io/mozilla/jobs/695728"
     # test_url = "http://localhost:8000"
     #greenhouse = ['https://boards.greenhouse.io/autogravitycorporation/jobs/218041#.WOhP0hLyvUJ']
-    greenhouse = [test_url]
-    browser.open(greenhouse[0])
-    applyGreenhouse(logger, file_path=file_path)
+    # greenhouse = [test_url]
+    # browser.open(greenhouse[0])
+    # applyGreenhouse(logger, file_path=file_path)
 
-    # for link in greenhouse:
-    #     browser.open(link)
-    #     applyGreenhouse(logger)
-    #     browser.newTab()
-    #     browser.rightTab()
+    for link in greenhouse:
+        browser.open(link)
+        applyGreenhouse(logger, file_path)
+        browser.newTab()
+        browser.rightTab()
 
 
     logger.info('--------END SESSION--------')
