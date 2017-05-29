@@ -50,6 +50,7 @@ def applyGreenhouse(logger, file_path):
                    "5626661609", "Irvine, California, United States"]
 
     inputs = []
+    # TODO: potential bug: id isnt there but the values are by name i.e. pinterest
     for i, text in zip(form_id, form_values):
         element = browser.findElementByID(i)
         # bug in pychrome? if cant find element it overrides previous element if didnt check for 0
@@ -133,7 +134,7 @@ def applyGreenhouse(logger, file_path):
     except TimeoutException:
         logger.error('Resume was not uploaded, save file here')
         dictionary_builder.save_question(current_url, 'Resume not uploaded')
-        #return
+        return 0
 
     # submit = browser.findElementByID("submit_app")
     # page = browser.findElementByTag('html')
@@ -144,11 +145,13 @@ def applyGreenhouse(logger, file_path):
     #     WebDriverWait(browser.driver, 5).until(
     #         expected_conditions.staleness_of(page)
     #     )
+    #     assert current_url != browser.driver.current_url, 'Fatal: Application URL equals Confirmation URL after submit'
     #     logger.info('Confirmation page, {}'.format(browser.driver.current_url))
+    #     return 1
     # except TimeoutException:
-    #     logger.error('URL didn\'t change, save file here')
+    #     logger.error('URL didn\'t change, save file here: {}'.format(current_url))
     #     dictionary_builder.save_question(current_url, 'Resume not uploaded')
-    #     #return
+    #     return 0
 
 def find_checkbox():
     siblings = browser.findSiblingsElements()
@@ -198,8 +201,11 @@ if __name__ == '__main__':
 
     # file_path = "C:\\Users\\brian\\Desktop\\Test.txt"
     file_path = "/Users/huyanh/Documents/dont_go_in_here/mesos-scraper/samples/HuyanhHoang-Resume.pdf"
+    assert os.path.isfile(file_path), 'not a valid path'
+    assert file_path.endswith('.pdf'), 'not a pdf'
 
-    greenhouse = dictionary_builder.parse_csv('../samples/urls.csv')[1:10]
+    greenhouse = dictionary_builder.parse_urls('../samples/urls.csv')
+    print(greenhouse)
     # test_url = "https://boards.greenhouse.io/mozilla/jobs/695728"
     # test_url = "http://localhost:8000"
     #greenhouse = ['https://boards.greenhouse.io/autogravitycorporation/jobs/218041#.WOhP0hLyvUJ']
@@ -207,11 +213,11 @@ if __name__ == '__main__':
     # browser.open(greenhouse[0])
     # applyGreenhouse(logger, file_path=file_path)
 
+    applied = 0
     for link in greenhouse:
         browser.open(link)
-        applyGreenhouse(logger, file_path)
-        browser.newTab()
-        browser.rightTab()
+        applied += applyGreenhouse(logger, file_path)
+    logger.info('Successfully applied to {} out of {} companies'.format(applied, len(greenhouse)))
 
 
     logger.info('--------END SESSION--------')
