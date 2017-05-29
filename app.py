@@ -121,8 +121,9 @@ def applyGreenhouse(logger, file_path):
                     except:
                         logger.error("Element isn't valid")
             else:
-                logging.warning('Question not in graph, saving: {}'.format(label.text))
-                dictionary_builder.save_question(current_url, 'Question not in graph', label.text)
+                question_to_save = label.text.split('\n')[0]
+                logging.warning('Question not in graph, saving: {}'.format(question_to_save))
+                dictionary_builder.save_question(current_url, 'Question not in graph', question_to_save)
         else:
             logger.warning('Label does not exist or not required')
     logger.info("Finished answering questions")
@@ -196,10 +197,11 @@ if __name__ == '__main__':
     logger.info('Using keyword dict: {}'.format(keyword_dict))
     logger.info('Using questions dict: {}'.format(questions_dict))
 
-    # file_path = "C:\\Users\\brian\\Desktop\\Test.txt"
-    file_path = "/Users/huyanh/Documents/dont_go_in_here/mesos-scraper/samples/HuyanhHoang-Resume.pdf"
+    file_path = "C:\\Users\\brian\\Desktop\\Test.txt"
+    #file_path = "/Users/huyanh/Documents/dont_go_in_here/mesos-scraper/samples/HuyanhHoang-Resume.pdf"
 
-    greenhouse = dictionary_builder.parse_csv('../samples/urls.csv')[1:10]
+
+    greenhouse_urls = dictionary_builder.parse_csv('..//samples/urls.csv')[1:10]
     # test_url = "https://boards.greenhouse.io/mozilla/jobs/695728"
     # test_url = "http://localhost:8000"
     #greenhouse = ['https://boards.greenhouse.io/autogravitycorporation/jobs/218041#.WOhP0hLyvUJ']
@@ -207,7 +209,8 @@ if __name__ == '__main__':
     # browser.open(greenhouse[0])
     # applyGreenhouse(logger, file_path=file_path)
 
-    for link in greenhouse:
+
+    for link in greenhouse_urls:
         browser.open(link)
         applyGreenhouse(logger, file_path)
         browser.newTab()
