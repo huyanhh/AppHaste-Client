@@ -26,12 +26,13 @@ def save_question(url: str, reason: str, question: str=''):
     day = datetime.datetime.now().strftime("%Y-%m-%d")
     with open('../samples/saved_urls_{}'.format(day), 'a', newline='') as file:
         writer = csv.writer(file, delimiter=',',
-                            quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                            quotechar='"', quoting=csv.QUOTE_MINIMAL)
         writer.writerow([url, reason, question])
 
 
-def parse_csv(file_name: str) -> list:
+def parse_urls(file_name: str) -> list:
     import csv
     with open(file_name, newline='') as file:
+        next(file)
         reader = csv.reader(file, delimiter=',')
         return [row[1] for row in reader]
