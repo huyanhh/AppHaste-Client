@@ -1,4 +1,8 @@
-# mesos-scraper
+# AppHaste
+
+AppHaste is a web portal that aggregates and filters jobs and internships that are relevant to users
+
+It uses Selenium to parse a csv of job links and goes through each one. AppHaste takes advantage of the good UX of boards such as Greenhouse and Jobvite.
 
 ## `keywords.txt`
 
